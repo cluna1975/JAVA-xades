@@ -42,5 +42,4 @@ bin/
 
 # Project specific
 src/main/resources/test_signed.xml
-src/main/resources/keystore.p12
-src/main/key/*.p12
+
