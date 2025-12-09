@@ -1,299 +1,117 @@
-# Guía de Instalación - JAVA-xades
+# Guía de Instalación y Ejecución - JAVA-xades
+
+Este proyecto implementa firmas electrónicas XAdES-BES utilizando la librería **XAdES4j**.
 
 ## Prerrequisitos
 
-Antes de usar este proyecto, necesitas tener instalado:
+Para ejecutar este proyecto, necesitas:
 
-### 1. Java Development Kit (JDK) 11 o superior
+1.  **Java Development Kit (JDK) 11 o superior** (Recomendado Java 17 LTS).
+    *   Verificar con: `java -version`
+2.  **Apache Maven 3.8 o superior**.
+    *   Verificar con: `mvn -version`
+3.  **Git** (Opcional, para clonar el repositorio).
 
-**Verificar instalación:**
-```bash
-java -version
-javac -version
-```
+---
 
-**Si no está instalado:**
-- Descargar desde: https://adoptium.net/ (recomendado)
-- O desde: https://www.oracle.com/java/technologies/downloads/
+## Instalación Rápida
 
-**Configurar JAVA_HOME:**
+1.  **Clonar el repositorio:**
 
-En Windows (PowerShell como Administrador):
-```powershell
-# Establecer JAVA_HOME (ajusta la ruta según tu instalación)
-[System.Environment]::SetEnvironmentVariable("JAVA_HOME", "C:\Program Files\Java\jdk-11", "Machine")
+    ```bash
+    git clone https://github.com/tu-usuario/java-xades.git
+    cd JAVA-xades
+    ```
 
-# Agregar Java al PATH
-$path = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
-[System.Environment]::SetEnvironmentVariable("Path", "$path;%JAVA_HOME%\bin", "Machine")
-```
+2.  **Configurar Certificado y Claves:**
 
-En Linux/Mac:
-```bash
-# Agregar a ~/.bashrc o ~/.zshrc
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
-export PATH=$JAVA_HOME/bin:$PATH
-```
+    El proyecto requiere un certificado digital válido (`.p12` o `.pfx`).
+    
+    *   Coloca tu archivo `.p12` en: `src/main/key/` (Ejemplo: `mr.p12`).
+    *   Asegúrate de actualizar la ruta y la contraseña en el archivo `src/main/java/com/xades/sri/Main.java`:
+    
+    ```java
+    String p12Path = "src/main/key/mr.p12";
+    String password = "TU_CONTRASEÑA_AQUI";
+    ```
 
-### 2. Apache Maven
+3.  **Preparar Archivo XML:**
+    
+    *   Coloca el archivo XML que deseas firmar en: `src/main/resources/test.xml`.
 
-**Verificar instalación:**
-```bash
-mvn -version
-```
+---
 
-**Si no está instalado:**
+## Ejecución del Proyecto
 
-#### Windows:
+Hemos facilitado la ejecución del proyecto mediante scripts automáticos que configuran las variables de entorno necesarias para Java 17+.
 
-**Opción 1: Usando Chocolatey (recomendado)**
-```powershell
-# Instalar Chocolatey primero si no lo tienes
-Set-ExecutionPolicy Bypass -Scope Process -Force
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+### Opción 1: Usando el Script Automático (Recomendado)
 
-# Instalar Maven
-choco install maven
-```
-
-**Opción 2: Manual**
-1. Descargar Maven desde: https://maven.apache.org/download.cgi
-2. Extraer a `C:\Program Files\Apache\maven`
-3. Configurar variables de entorno:
+Simplemente ejecuta el siguiente comando en tu terminal (CMD o PowerShell):
 
 ```powershell
-# Establecer M2_HOME
-[System.Environment]::SetEnvironmentVariable("M2_HOME", "C:\Program Files\Apache\maven", "Machine")
-
-# Agregar Maven al PATH
-$path = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
-[System.Environment]::SetEnvironmentVariable("Path", "$path;%M2_HOME%\bin", "Machine")
+.\run.bat
 ```
 
-4. Reiniciar PowerShell y verificar:
+> **Nota:** Este script configura automáticamente `MAVEN_OPTS` para evitar errores de acceso modular (`InaccessibleObjectException`) y ejecuta la limpieza, compilación y firma en un solo paso.
+
+### Opción 2: Ejecución Manual con Maven
+
+Si prefieres ejecutarlo manualmente o estás en un entorno Linux/Mac, usa el siguiente comando:
+
+**En Windows (PowerShell):**
 ```powershell
-mvn -version
+$env:MAVEN_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
+mvn clean package exec:java
 ```
 
-#### Linux (Ubuntu/Debian):
+**En Linux / Mac:**
 ```bash
-sudo apt update
-sudo apt install maven
+export MAVEN_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED"
+mvn clean package exec:java
 ```
 
-#### Linux (Fedora/RHEL):
-```bash
-sudo dnf install maven
-```
+---
 
-#### macOS:
-```bash
-# Usando Homebrew
-brew install maven
-```
+## Verificación
 
-### 3. Git (Opcional)
+Una vez que el proceso finalice correctamente, verás un mensaje como:
 
-Para clonar el repositorio:
-```bash
-git --version
-```
-
-Si no está instalado:
-- Windows: https://git-scm.com/download/win
-- Linux: `sudo apt install git` o `sudo dnf install git`
-- macOS: `brew install git`
-
-## Instalación del Proyecto
-
-### 1. Clonar o Descargar el Proyecto
-
-**Con Git:**
-```bash
-git clone <repository-url>
-cd JAVA-xades
-```
-
-**Sin Git:**
-- Descargar el ZIP del repositorio
-- Extraer en una carpeta
-- Abrir terminal en esa carpeta
-
-### 2. Descargar Dependencias
-
-```bash
-mvn clean install
-```
-
-Este comando:
-- Descarga todas las dependencias (XAdES4j, Bouncy Castle, Guava, etc.)
-- Compila el proyecto
-- Ejecuta tests (si existen)
-- Genera el JAR en `target/`
-
-### 3. Verificar la Instalación
-
-```bash
-mvn compile
-```
-
-Si todo está correcto, verás:
 ```
 [INFO] BUILD SUCCESS
+...
+Signed file: src/main/resources/test_signed.xml
 ```
 
-## Configuración del Certificado
+El archivo firmado se generará en: `src/main/resources/test_signed.xml`.
 
-### 1. Obtener un Certificado PKCS12 (.p12)
-
-Para firmar documentos necesitas un certificado digital en formato PKCS12.
-
-**Si tienes un certificado del SRI:**
-- Colócalo en: `src/main/key/mr.p12`
-
-**Para pruebas, puedes generar uno auto-firmado:**
-
-```bash
-keytool -genkeypair -alias testkey -keyalg RSA -keysize 2048 \
-  -validity 365 -keystore src/main/key/mr.p12 -storetype PKCS12 \
-  -dname "CN=Test User, OU=Test, O=Test Org, L=Quito, ST=Pichincha, C=EC"
-```
-
-Te pedirá una contraseña. Usa la misma en el código.
-
-### 2. Verificar el Certificado
-
-```bash
-keytool -list -v -keystore src/main/key/mr.p12 -storetype PKCS12
-```
-
-## Estructura de Directorios
-
-Asegúrate de que existan estos directorios:
-
-```bash
-mkdir -p src/main/key
-mkdir -p src/main/resources
-```
-
-## Compilación y Ejecución
-
-### Compilar:
-```bash
-mvn clean compile
-```
-
-### Ejecutar:
-```bash
-mvn exec:java -Dexec.mainClass="com.xades.sri.Main"
-```
-
-### Generar JAR ejecutable:
-```bash
-mvn clean package
-java -jar target/xades-sri-signer-1.0-SNAPSHOT.jar
-```
+---
 
 ## Solución de Problemas Comunes
 
-### Error: "JAVA_HOME not set"
+### 1. Error: `java.lang.reflect.InaccessibleObjectException`
+Este error ocurre en versiones recientes de Java (16+) debido a la encapsulación de módulos.
+**Solución:** Usa siempre el script `run.bat` o asegúrate de establecer la variable `MAVEN_OPTS` con `--add-opens java.base/java.lang=ALL-UNNAMED` antes de ejecutar.
 
-**Windows:**
-```powershell
-# Ver JAVA_HOME actual
-echo $env:JAVA_HOME
+### 2. Error: "No se puede cargar el archivo run.ps1... no está firmado digitalmente"
+PowerShell bloquea scripts no firmados por seguridad.
+**Solución:** Usa `.\run.bat` en su lugar, ya que no tiene esta restricción.
 
-# Establecer temporalmente
-$env:JAVA_HOME = "C:\Program Files\Java\jdk-11"
+### 3. Error: Contraseña incorrecta o KeyStore inválido
+Asegúrate de que la contraseña en `Main.java` coincida exactamente con la de tu archivo `.p12`.
+
+---
+
+## Estructura del Proyecto
+
 ```
-
-**Linux/Mac:**
-```bash
-# Ver JAVA_HOME actual
-echo $JAVA_HOME
-
-# Establecer temporalmente
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+JAVA-xades/
+├── src/
+│   ├── main/
+│   │   ├── java/           # Código fuente Java
+│   │   ├── key/            # Certificados digitales (.p12)
+│   │   └── resources/      # Archivos XML de prueba (entrada/salida)
+├── run.bat                 # Script de ejecución para Windows
+├── pom.xml                 # Configuración de Maven
+└── README.md               # Información general
 ```
-
-### Error: "mvn command not found"
-
-Reinicia la terminal después de instalar Maven, o verifica el PATH:
-
-**Windows:**
-```powershell
-echo $env:Path
-```
-
-**Linux/Mac:**
-```bash
-echo $PATH
-```
-
-### Error: "Cannot resolve dependencies"
-
-```bash
-# Limpiar caché de Maven
-mvn dependency:purge-local-repository
-
-# Forzar actualización
-mvn clean install -U
-```
-
-### Error: "Unsupported class file major version"
-
-Tu JDK es muy antiguo. Este proyecto requiere Java 11+.
-
-```bash
-# Verificar versión
-java -version
-
-# Debe mostrar version 11 o superior
-```
-
-## Configuración del IDE
-
-### IntelliJ IDEA:
-1. File → Open → Seleccionar carpeta del proyecto
-2. IntelliJ detectará automáticamente el proyecto Maven
-3. Esperar a que descargue dependencias
-4. Run → Edit Configurations → Add New → Application
-5. Main class: `com.xades.sri.Main`
-
-### Eclipse:
-1. File → Import → Maven → Existing Maven Projects
-2. Seleccionar carpeta del proyecto
-3. Finish
-4. Click derecho en proyecto → Maven → Update Project
-
-### VS Code:
-1. Instalar extensiones:
-   - Extension Pack for Java
-   - Maven for Java
-2. Abrir carpeta del proyecto
-3. VS Code detectará automáticamente el proyecto Maven
-
-## Próximos Pasos
-
-Una vez instalado todo:
-
-1. ✅ Coloca tu certificado `.p12` en `src/main/key/`
-2. ✅ Coloca un XML de prueba en `src/main/resources/test.xml`
-3. ✅ Actualiza la contraseña en `Main.java`
-4. ✅ Ejecuta: `mvn exec:java -Dexec.mainClass="com.xades.sri.Main"`
-5. ✅ Verifica el XML firmado en `src/main/resources/test_signed.xml`
-
-## Recursos Adicionales
-
-- [Maven Getting Started](https://maven.apache.org/guides/getting-started/)
-- [XAdES4j Documentation](https://github.com/luisgoncalves/xades4j/wiki)
-- [Java Keytool Guide](https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html)
-
-## Soporte
-
-Si encuentras problemas:
-1. Verifica que Java 11+ esté instalado
-2. Verifica que Maven esté instalado
-3. Revisa los logs de error
-4. Abre un issue en el repositorio con los detalles del error
